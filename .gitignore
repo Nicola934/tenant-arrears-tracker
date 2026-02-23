@@ -22,5 +22,3 @@ Thumbs.db
 
 *.xlsx
 *.xls
-
-!data/tenant_arrears_mock.xlsx

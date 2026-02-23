@@ -60,6 +60,13 @@ tenant-arrears-tracker/
         ├── app.py
         └── cli.py
 ```
+### Generate Mock Workbook (Optional)
+
+To generate a sample Excel workbook with mock tenants and ledger entries:
+
+```bash
+python scripts/generate_mock_workbook.py
+
 
 ---
 

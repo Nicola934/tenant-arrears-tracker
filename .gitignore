@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+.env
+
+# Outputs (generated files)
+outputs/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+*.xlsx
+*.xls
+
+!data/tenant_arrears_mock.xlsx

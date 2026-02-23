@@ -1,0 +1,24 @@
+Tenant_Arrears_Tracker/
+  requirements.txt
+  README.md
+  src/arrears_engine/
+    __init__.py
+    models.py
+    config.py
+    utils.py
+    io.py
+    render.py
+    engine.py
+    cli.py
+  scripts/
+    generate_mock_workbook.py
+  data/
+    config.example.json
+    tenant_arrears_mock.xlsx
+  outputs/
+    arrears_snapshot_2026-02-11.csv
+    reminders_2026-02-11.csv
+    email_dryrun_2026-02-11.txt
+  docs/
+    Sample1_OnePager.pdf
+    onepager_preview-1.png

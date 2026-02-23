@@ -1,0 +1,25 @@
+{
+    "workbook_path": "data/tenant_arrears_mock.xlsx",
+    "tenants_sheet": "Tenants",
+    "ledger_sheet": "Ledger",
+    "reminder_rules": [
+        {
+            "min_days": 1,
+            "max_days": 7,
+            "subject_template": "Friendly Reminder - Rent Overdue",
+            "body_template": "Dear {tenant_name}, your rent is {balance} overdue by {days_overdue} days."
+        },
+        {
+            "min_days": 8,
+            "max_days": 30,
+            "subject_template": "Second Notice - Rent Overdue",
+            "body_template": "Dear {tenant_name}, please settle {balance}. It is {days_overdue} days overdue."
+        },
+        {
+            "min_days": 31,
+            "max_days": null,
+            "subject_template": "Final Notice",
+            "body_template": "Dear {tenant_name}, your account is seriously overdue: {balance}."
+        }
+    ]
+}

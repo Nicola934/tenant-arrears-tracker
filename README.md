@@ -333,6 +333,7 @@ This allows scheduling via:
 
 Designed to scale from:
 Small portfolio → Multi-property operations → Productized automation
+<<<<<<< HEAD
 
 ---
 
@@ -357,3 +358,31 @@ Small portfolio → Multi-property operations → Productized automation
 The architecture supports growth without structural refactor.
 
 ---
+=======
+
+---
+
+## 13. Use Cases
+
+* Property managers
+* Student accommodation operators
+* Rental portfolio administrators
+* Finance ops teams
+* Admin-heavy SMEs
+
+---
+
+## 14. Future Extensions
+
+* Email API integration
+* Database-backed ledger ingestion
+* Web dashboard layer
+* Multi-property segmentation
+* Role-based reporting
+
+The architecture supports growth without structural refactor.
+
+---
+
+
+>>>>>>> d36f1a4 (feat: finalize tenant arrears tracker with proration and CLI improvements)

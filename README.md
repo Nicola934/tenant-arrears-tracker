@@ -1,78 +1,249 @@
-# Tenant Arrears Tracker + Reminder Engine
+# Tenant Arrears Tracker + Ops Dashboard
 
-A structured rent arrears monitoring system that calculates tenant balances deterministically, categorizes aging risk, generates reminder queues, and feeds an auto-refreshing Excel operations dashboard.
+Production-grade Python automation system for property managers.
+Automates arrears aging, FIFO payment allocation, reminder generation, and operational reporting from structured Excel inputs.
 
----
-
-## Overview
-
-Property managers often track rent manually using spreadsheets, leading to inconsistent calculations, missed follow-ups, and limited visibility into aging risk.
-
-This project provides a structured arrears engine that processes tenant and ledger data, computes balances reliably, classifies overdue accounts, and exports operational reports for decision-making.
+Designed for admin-heavy property operations where accuracy, repeatability, and auditability matter.
 
 ---
 
-## Key Features
+## 1. Domain Problem
 
-- Deterministic arrears calculation logic  
-- Aging bucket classification (Current, 1–7, 8–30, 31–60, 60+)  
-- Automated reminder generation  
-- Property-level risk segmentation  
-- Manager workload visibility  
-- Historical arrears trend tracking  
-- CLI-based validation and execution  
-- Auto-refresh Excel dashboard integration  
+Property managers deal with recurring rent charges, partial payments, move-outs, and inconsistent ledger records.
+Manual arrears tracking leads to:
+
+* Incorrect aging buckets
+* Misapplied payments
+* Inconsistent reminder timing
+* No clear historical reporting
+* High administrative overhead
+
+This system solves that.
+
+It processes tenant and ledger data from Excel, applies strict FIFO arrears logic, handles partial payments and move-out proration correctly, and produces:
+
+* Arrears snapshot (CSV)
+* Reminder list (CSV)
+* Historical outputs for dashboard tracking
+
+An Excel Ops Dashboard automatically updates from snapshot + history data.
 
 ---
 
-## Architecture
+## 2. Core Features
 
-Excel (Data Entry + Dashboard)  
-→ Python Engine (Validation + Computation)  
-→ CSV Snapshot + History Exports  
-→ Excel Ops Dashboard (Power Query Refresh)
+* Excel-based tenant + ledger ingestion
+* FIFO arrears aging engine
+* Accurate handling of partial payments
+* Move-out proration support
+* Config-driven reminder rules
+* CLI-based execution (run, validate, status)
+* Snapshot + reminders CSV export
+* Excel Ops Dashboard integration
+* Dry-run mode for safe testing
+* Deterministic, auditable outputs
 
-The computation layer is isolated from the dashboard, ensuring consistent calculations and clean separation of concerns.
+This is automation designed for production, not experimentation.
 
 ---
 
-## Project Structure
+## 3. Architecture Overview
 
-```
-tenant-arrears-tracker/
-│
-├── README.md
-├── requirements.txt
-├── data/
-│   └── config.example.json
-├── docs/
-│   ├── dashboard_overview.png
-│   ├── cli_run_example.png
-│   └── cli_validate_example.png
-├── outputs/   (generated at runtime)
-└── src/
-    └── arrears_engine/
-        ├── models.py
-        ├── config.py
-        ├── io.py
-        ├── engine.py
-        ├── export.py
-        ├── app.py
-        └── cli.py
-```
-### Generate Mock Workbook (Optional)
+The system follows a clean layered structure:
 
-To generate a sample Excel workbook with mock tenants and ledger entries:
+CLI → Application Layer → Domain Engine → I/O Layer → Outputs
+
+### Key Modules
+
+models.py
+Defines core domain objects:
+
+* Tenant
+* LedgerEntry
+* ArrearsSnapshotRow
+* ReminderRule
+* ReminderRecord
+
+These are structured representations of business entities.
+
+---
+
+io.py
+Handles:
+
+* Excel ingestion (tenants + ledger)
+* Config loading
+* CSV output writing
+
+Strict separation of I/O from business logic ensures testability.
+
+---
+
+engine.py
+Core arrears computation logic:
+
+* FIFO charge allocation
+* Payment application
+* Aging bucket classification
+* Move-out proration handling
+* Snapshot generation
+
+This is the deterministic engine.
+
+---
+
+render.py
+Responsible for:
+
+* Selecting applicable reminder rules
+* Rendering reminder messages
+* Formatting reminder outputs
+
+Separates business logic from communication logic.
+
+---
+
+cli.py
+Provides command-line interface:
+
+* run
+* validate-config
+* status
+* --dry-run
+
+This turns the system into an operational tool rather than a script.
+
+---
+
+## 4. FIFO Arrears Logic (Why It Matters)
+
+FIFO = First-In, First-Out.
+
+Payments are applied to the oldest unpaid charges first.
+
+Why this is critical:
+
+* Prevents artificial aging distortion
+* Ensures legal defensibility
+* Produces correct “days overdue” calculations
+* Reflects real-world accounting standards
+
+Without FIFO:
+A tenant paying partially could appear current on new charges while old balances remain hidden.
+
+With FIFO:
+The system identifies the true oldest unpaid charge and calculates arrears age accurately.
+
+This is fundamental to reliable arrears reporting.
+
+---
+
+## 5. Partial Payments
+
+Partial payments are correctly allocated across historical charges.
+
+Example:
+
+January charge: 5000
+February charge: 5000
+Payment: 6000
+
+Allocation:
+
+* January fully cleared (5000)
+* February partially cleared (1000 unpaid = 4000 remaining)
+
+The engine tracks residual balances and computes aging accordingly.
+
+No approximations. No manual adjustments required.
+
+---
+
+## 6. Move-Out Proration
+
+Tenants who vacate mid-month must not be charged full rent.
+
+The engine supports:
+
+* Move-out date recognition
+* Prorated charge calculation
+* Correct aging based on adjusted balances
+
+This prevents inflated arrears figures and ensures financial fairness.
+
+Critical for portfolio integrity and reporting accuracy.
+
+---
+
+## 7. Outputs
+
+Each run produces:
+
+outputs/
+
+* arrears_snapshot_YYYY-MM-DD.csv
+* reminders_YYYY-MM-DD.csv
+* email_dryrun_YYYY-MM-DD.txt (if dry-run)
+
+Snapshot contains:
+
+* Tenant ID
+* Total arrears
+* Oldest unpaid charge date
+* Days overdue
+* Aging bucket (D01_07, D08_30, D31_60, D60_PLUS)
+
+These files feed the Excel Ops Dashboard.
+
+---
+
+## 8. Ops Dashboard
+
+The Excel Ops Dashboard:
+
+* Reads latest snapshot + history
+* Displays arrears bucket distribution
+* Tracks trend over time
+* Shows operational KPIs
+* Supports management-level reporting
+
+The Python system is the data engine.
+The Excel dashboard is the presentation layer.
+
+Separation of concerns improves maintainability.
+
+---
+
+## 9. Installation
+
+### 1. Clone Repository
 
 ```bash
-python scripts/generate_mock_workbook.py
+git clone https://github.com/your-username/tenant-arrears-tracker.git
+cd tenant-arrears-tracker
+```
 
+### 2. Create Virtual Environment
 
----
+```bash
+python -m venv venv
+```
 
-## Installation
+Activate:
 
-Create a virtual environment and install dependencies:
+Windows:
+
+```bash
+venv\Scripts\activate
+```
+
+Mac/Linux:
+
+```bash
+source venv/bin/activate
+```
+
+### 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -80,81 +251,109 @@ pip install -r requirements.txt
 
 ---
 
-## Usage
+## 10. Project Structure
 
-### Validate Inputs
+```
+Sample1_Tenant_Arrears_Tracker/
+│
+├── requirements.txt
+├── README.md
+│
+├── src/
+│   └── arrears_engine/
+│       ├── __init__.py
+│       ├── models.py
+│       ├── config.py
+│       ├── utils.py
+│       ├── io.py
+│       ├── render.py
+│       ├── engine.py
+│       └── cli.py
+│
+├── scripts/
+│   └── generate_mock_workbook.py
+│
+├── data/
+│   ├── config.example.json
+│   └── tenant_arrears_mock.xlsx
+│
+├── outputs/
+│
+└── docs/
+    ├── Sample1_OnePager.pdf
+    └── onepager_preview-1.png
+```
+
+---
+
+## 11. CLI Usage
+
+Run full pipeline:
 
 ```bash
-python -m arrears_engine.cli validate --config data/config.example.json
+python -m arrears_engine.cli run
 ```
 
-Checks:
-- Config file validity
-- Workbook path
-- Required sheets
-- Required columns
-
----
-
-### Run Pipeline
+Dry run (no final email send simulation):
 
 ```bash
-python -m arrears_engine.cli run --config data/config.example.json
+python -m arrears_engine.cli run --dry-run
 ```
 
-Optional:
+Validate configuration:
 
 ```bash
-python -m arrears_engine.cli run --config data/config.example.json --as-of 2026-02-01
+python -m arrears_engine.cli validate-config
 ```
 
----
-
-### View System Status
+Check system status:
 
 ```bash
-python -m arrears_engine.cli status --config data/config.example.json
+python -m arrears_engine.cli status
 ```
 
----
+This allows scheduling via:
 
-## Outputs
-
-Running the pipeline generates:
-
-- `arrears_snapshot_latest.csv`
-- `arrears_snapshot_YYYY-MM-DD.csv`
-- `arrears_history.csv`
-- `reminders_YYYY-MM-DD.csv`
-- `email_dryrun_YYYY-MM-DD.txt`
-
-The Excel dashboard reads:
-
-- arrears_snapshot_latest.csv  
-- arrears_history.csv  
-
-and refreshes automatically via Power Query.
+* Windows Task Scheduler
+* Cron jobs
+* CI/CD pipelines
+* Remote execution scripts
 
 ---
 
-## Operational Impact
+## 12. Reliability & Design Principles
 
-This system enables:
+* Deterministic outputs
+* Separation of concerns
+* No business logic in I/O layer
+* Strict domain modeling
+* Config-driven rules
+* Safe dry-run mode
+* Extensible architecture
 
-- Reduced manual reconciliation
-- Consistent arrears calculations
-- Faster follow-up prioritization
-- Clear aging risk visibility
-- Portfolio-level decision intelligence
+Designed to scale from:
+Small portfolio → Multi-property operations → Productized automation
 
 ---
 
-## Technologies Used
+## 13. Use Cases
 
-- Python
-- Pandas
-- CLI architecture
-- Excel Power Query
-- PivotTables
-- Structured data modeling
-```
+* Property managers
+* Student accommodation operators
+* Rental portfolio administrators
+* Finance ops teams
+* Admin-heavy SMEs
+
+---
+
+## 14. Future Extensions
+
+* Email API integration
+* Database-backed ledger ingestion
+* Web dashboard layer
+* Multi-property segmentation
+* Role-based reporting
+
+The architecture supports growth without structural refactor.
+
+---

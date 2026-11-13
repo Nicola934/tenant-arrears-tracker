@@ -16,7 +16,7 @@ def pick_rule(rules: list[ReminderRule], days_overdue: int) -> ReminderRule | No
 
 def render_reminder(rule: ReminderRule, row: ArrearsSnapshotRow) -> tuple[str, str]:
     subject = rule.subject_template.format(
-        tenat_name=row.tenant_name,
+        tenant_name=row.tenant_name,
         balance=row.balance,
         days_overdue=row.days_overdue,
         lease_id=row.lease_id,
